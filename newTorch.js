@@ -1,14 +1,14 @@
 torchPlugin = function(){
     // Versioning Info//
-    this.name         	= "torchPlugin";
-	this.version 		= "0.1";
+    this.name             = "torchPlugin";
+    this.version 		= "0.1";
 	
 	// Globals//
 	this.HASTORCH 		= "hasTorch";
 	this.TORCHCNT 		= "torchCount";
 	this.DMNAME 		= "DM";
 	state.torchPlugin 	= {
-		activePairs: undefined
+		activePairs: undefined,
 	};
 };
 
@@ -19,7 +19,7 @@ torchPlugin.prototype.snuff = function(characterName){
 		if (pair[0].get("name") == characterName)
 		{
 			pair[0].set(this.HASTORCH, "0");
-			pair[1].delete();
+			pair[1].remove();
 			sendChat(this.name, "/w "+this.DMNAME+" Snuffed torch for "+pair[0].get("name")+".");
 			return;
 		}
@@ -137,8 +137,9 @@ torchPlugin.prototype.use = function(charName){
 torchPlugin.prototype.activateFor = function(name, amount){
 	var character = this.getChar(name);
 	// Check to see if we already have the attributes
-	var hasTorch = getAttrByName(character.get("_id"), this.HASTORCH, "current");
-	var torchCnt = getAttrByName(character.get("_id"), this.TORCHCNT, "current");
+    log(character)
+	var hasTorch = getAttrByName(character.id, this.HASTORCH, "current");
+	var torchCnt = getAttrByName(character.id, this.TORCHCNT, "current");
 	var test = [
 		hasTorch,
 		torchCnt
@@ -152,12 +153,12 @@ torchPlugin.prototype.activateFor = function(name, amount){
 	var hasTorch = createObj("attribute",{
 		current:		 "1",
 		name: 			this.HASTORCH,
-		_characterid: 	character.get("_id")
+		_characterid: 	character.id
 	});
 	var torchCnt = createObj("attribute",{
 		current:		amount,
 		name:			this.TORCHCNT,
-		_characterid:	character.get("_id")
+		_characterid:	character.id
 	});
 	
 	if (hasTorch == undefined || torchCnt == undefined)
@@ -177,9 +178,8 @@ torchPlugin.prototype.setAmount = function(name, amount){
 }
 
 // Initialization Function
-init = function(torchInstance){
+Torchinit = function(torchInstance){
 	on("chat:message", function(msg){
-        log("Message: "+msg);
 		// Only care about API messages
 		if (msg.type != "api")
 			return;
@@ -187,7 +187,7 @@ init = function(torchInstance){
 		var content = msg.content;
 		
 		// Only care about "!torch" messages
-		if (content.toLowerCase().indexOf("!torch") != -1)
+		if (content.toLowerCase().indexOf("!torch") == -1)
 			return;
 		
 		// Now we do our actual callbacks
@@ -206,7 +206,7 @@ init = function(torchInstance){
 		}
 		if (content.toLowerCase().indexOf("!torch-activate") != -1)
 		{
-            log("Attempting to activate a torch.");
+            log("Attempting to activate torch plugin.");
 			var ret = torchInstance.getName(msg, 1);
 			torchInstance.activateFor(ret[0], ret[1]);
 		}
@@ -230,5 +230,5 @@ init = function(torchInstance){
 
 on("ready", function(){
 	var tPlugin = new torchPlugin();
-	init(tPlugin);
+	Torchinit(tPlugin);
 });
