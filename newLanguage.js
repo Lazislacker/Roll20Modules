@@ -1,10 +1,15 @@
 /*
     |-------------------------------------------------------------------------------------------------------|
-    |Name: Language Plugin                																	|
+    |Name: Language Plugin                    																|
 	|-------------------------------------------------------------------------------------------------------|
-	|Setup Requirements:																					|				
+	|Setup Requirements:																					|
+	|	DMNAME should be set to the name of the DM, !lang-activate should be called for each character		|
+	|	that is going to use the plugin.																	|
 	|-------------------------------------------------------------------------------------------------------|
 	|Usage Info:																							|
+	|	!lang <language> <message> : Sends out a message in the given language								|
+	|	!lang-activate <characterName> : Activates the plugin for the given character						|
+	|	!lang-deactivate <characterName> : Deactivates the plugin for the given character					|
 	|-------------------------------------------------------------------------------------------------------|
 */
 
@@ -163,21 +168,22 @@ langPlugin.prototype.Translate = function(msg){
     log("--------------------------------------------------------");
 };
 
-init =  function(langInstance){
+Langinit =  function(langInstance){
 	on ('chat:message', function(msg){
+        //log(langInstance)
         if (msg.type != "api")
             return;
         if (msg.content.indexOf("!lang-activate") != -1)
-            lang.Activate(msg);
+            langInstance.Activate(msg);
         else if (msg.content.indexOf("!lang-deactivate") != -1)
-            lang.Deactivate(msg);
+            langInstance.Deactivate(msg);
         else if (msg.content.indexOf("!lang") != -1)
-            lang.Translate(msg);
+            langInstance.Translate(msg);
     });
     log("Loading "+langInstance.name+" v"+langInstance.version+" ...");
 };
 
 on("ready", function(){
     var lang = new langPlugin();
-    init(lang);
+    Langinit(lang);
 });
