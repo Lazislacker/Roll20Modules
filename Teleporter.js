@@ -1,6 +1,6 @@
 /*
     |-------------------------------------------------------------------------------------------------------|
-    |Name: Teleporter Plugin                																|
+    |Name: Teleporter Plugin                    															|
 	|-------------------------------------------------------------------------------------------------------|
 	|Setup Requirements:																					|
 	|	A token should be placed at each location a teleporter can be. The token should be labelled as:		|
@@ -23,12 +23,12 @@ teleporterPlugin = function(){
 	
 	//Globals//
 	this.DMName 	= "DM";
-    this.Enabled    = "True"
+    this.Enabled    = "True";
 	state.teleporterPlugin = {
     teleporterTokens: undefined,
     teleporterNames: undefined
 	};	
-}
+};
 
 //Fetches all tokens with the "[tp]" tag on the active page
 teleporterPlugin.prototype.getTokens = function(){
@@ -36,13 +36,13 @@ teleporterPlugin.prototype.getTokens = function(){
 	var allTokens = findObjs({
 		_subtype: "token",
 		_pageid: Campaign().get("playerpageid")
-	})
+	});
 	if (allTokens == undefined){
 		sendChat(this.name, "/w "+this.DMName+" Error: No tokens were found for this page!");
 		return;
 	}
 	var teleporterTokens = {};
-    var tokenNames = []
+    var tokenNames = [];
 	for (var i = 0; i < allTokens.length; ++i){
         var Token = allTokens[i];
 		if (Token.get("name").toLowerCase().indexOf("[tp]") != -1){
@@ -56,7 +56,7 @@ teleporterPlugin.prototype.getTokens = function(){
 		return;
 	}
 	return [teleporterTokens, tokenNames];
-}
+};
 
 //Cleans out our state variables
 teleporterPlugin.prototype.cleanGlobals = function(){
@@ -65,7 +65,7 @@ teleporterPlugin.prototype.cleanGlobals = function(){
     teleporterTokens: undefined,
     teleporterNames: undefined
 	};
-}
+};
 
 //Checks a move to see if we should shift the token
 teleporterPlugin.prototype.checkMove = function(movingToken){
@@ -73,7 +73,7 @@ teleporterPlugin.prototype.checkMove = function(movingToken){
 	if (state.teleporterPlugin.teleporterTokens == undefined){
 		var tokens = this.getTokens();
 		state.teleporterPlugin.teleporterTokens = tokens[0];
-        state.teleporterPlugin.teleporterNames = tokens[1]
+        state.teleporterPlugin.teleporterNames = tokens[1];
 	}
 	//log("Check Move Running...");
 	var tokenList = state.teleporterPlugin.teleporterTokens;
@@ -93,20 +93,19 @@ teleporterPlugin.prototype.checkMove = function(movingToken){
             movingToken.set("left",xloc);
             movingToken.set("top",yloc);
             sendChat(this.name, "/w "+this.DMName+" Successfully moved token: "+movingToken.get("name"));
-			sendPing(xloc, yloc, Campaign.get("playerpageid"), null, true);
             return;
 		}
     }
-}
+};
 
 //Toggle plugin on and off
 teleporterPlugin.prototype.Toggle = function(){
     this.Enabled = (this.Enabled == "True")?"False":"True";
     var end = (this.Enabled == "True")?"enabled":"disabled";
     sendChat(this.name, "/w "+this.DMName+" "+this.name+" has been "+end);
-}
+};
 //Initializes the plugin
-init = function(Teleinstance){
+Teleinit = function(Teleinstance){
 	//Perform Initialization here//
 	on("chat:message", function(msg){
 		//Check our exit conditions
@@ -116,7 +115,7 @@ init = function(Teleinstance){
 			return;
             
         if (msg.content.indexOf("!teleporter-toggle") != -1)
-            Teleinstance.Toggle()
+            Teleinstance.Toggle();
 		if (Teleinstance.Enabled == "False")
             return;
 		if (msg.content.indexOf("!teleporter-reset") != -1){
@@ -127,31 +126,31 @@ init = function(Teleinstance){
 		if (msg.content.indexOf("!teleporter-list") != -1){
              log("List running...");
 			var list = Teleinstance.getTokens()[1];
-			sendChat(Teleinstance.name, "/w "+Teleinstance.DMName+" Listing Teleporter Names:")
+			sendChat(Teleinstance.name, "/w "+Teleinstance.DMName+" Listing Teleporter Names:");
 			_.each(list, function(Obj){
                 sendChat(Teleinstance.name, "/w "+Teleinstance.DMName+" "+Obj);    		
-			})
+			});
 		}
 		if (msg.content.indexOf("!teleporter-test") != -1){
             log("Test running...");
             //Teleinstance.checkMove(undefined)
         }
-	})
+	});
     on("change:graphic:lastmove", function(Token){
         if (Teleinstance.Enabled == "False")
             return;
         Teleinstance.checkMove(Token);
-    })
+    });
 	on("change:campaign:playerpageid", function(){
         if (Teleinstance.Enabled == "False")
             return;
 		//log("Page changed, clearing state variables...");
 		Teleinstance.cleanGlobals();
-	})
-    log(Teleinstance.name+" "+Teleinstance.version+" loaded...")
-}
+	});
+    log(Teleinstance.name+" "+Teleinstance.version+" loaded...");
+};
 
 on("ready", function(){
 	teleporter = new teleporterPlugin();
-	init(teleporter);
-})
+	Teleinit(teleporter);
+});
